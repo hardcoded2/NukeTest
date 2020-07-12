@@ -32,6 +32,8 @@ class Build : NukeBuild
     [Solution] readonly Solution Solution;
     [GitRepository] readonly GitRepository GitRepository;
     [GitVersion] readonly GitVersion GitVersion;
+    [LocalExecutable("./tools/protoc/protoc.exe")]
+    readonly Tool Protoc;
 
     AbsolutePath SourceDirectory => RootDirectory / "Inventory";
     AbsolutePath TestsDirectory => RootDirectory / "Inventory.Tests";
@@ -52,7 +54,11 @@ class Build : NukeBuild
             DotNetRestore(s => s
                 .SetProjectFile(Solution));
         });
-
+    Target BuildProtosToDLL => _ => _
+        .Executes(() =>
+        {
+            Logger.Normal("HELLO WORLD");   
+        });
     Target Compile => _ => _
         .DependsOn(Restore)
         .Executes(() =>
