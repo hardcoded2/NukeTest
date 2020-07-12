@@ -1,0 +1,11 @@
+syntax = "proto3";
+import "item_data.proto";
+
+message PlayerData {
+    int32 data_version = 1; //git hash and/or file hashes
+    bytes player_ID = 2;
+    repeated ItemData items = 3; //can use the two-pass parsing method used inside of item data as well to isolate higher level changes if needed
+    //ie - if we want to iterate on the basic structure of the item data rather than specific item types, we would have a data version for items, and a repeated byte array to parse seperately
+    //it is possible that the initial dead recon is good enough through most of dev, and you only add metadata fields, so not elaborating there
+}
+

@@ -1,0 +1,1 @@
+C:\ProgramData\chocolatey\lib\protoc\tools\bin\protoc

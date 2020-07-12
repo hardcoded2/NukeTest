@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+message ItemData{
+    string data_version = 1; //human readable
+    string data_hash = 2; //hash of all item data (could be git hash for non-dev environments)
+    string item_id = 3;
+    string human_name = 4;
+    bytes sub_type_data = 5;
+    
+    string json_serialized_temp_state = 6; //short term client side only data for testing, server does not need this data
+
+    repeated ArtAsset artAssets = 7; //all related art assets
+    enum ItemType{
+        UNIQUE = 0;
+        ANONYMOUS = 1;
+        PROVISIONAL = 2; //ie temporary item before server ack's user action
+        
+    }
+}
+
+//migrations with domain specific rules
+message ColorProtobufv1{
+    float r = 1;
+    float g = 2; 
+    float b = 3;
+    //float a = 4;
+}
+message ColorProtobufv2{ //this will be handled by protobufs technically, but not in practice
+    float r = 1;
+    float g = 2;
+    float b = 3;
+    float a = 4;
+}
+//can be handled by namespacing and upgrades there, but that will cause import thrashing, or silent upgrade problems
+
+//different classes of data and possible upgrades between types
+//deeper domain specific rules and interactions with designer-driven data
+//leave open possibility of designer leaving in flags/data to do migrations, but then that puts that data on the testing path to avoid data loss/corruption
+message StickAnonymousItemType{
+    int32 num_sticks = 1;
+}
+message StickUniqueItemType{
+    string stick_uuid = 1; //link to designer driven assets/etc
+    int32 durability_percent_as_integer = 2;
+}
+
+//denormalized for the purposes of simplicity, but likely use references (ie guids from art assets or addressable asset reference)
+message ArtAsset{
+    enum ArtType {
+        IMAGE = 0;
+        MODEL = 1;
+        AUDIO = 2;
+    }
+    //how they're used - ie preview, store, in-world/etc
+    string id = 1;
+    string HumanName = 2;
+    enum ArtDesignTag {
+        PREVIEW = 0;
+        IN_WORLD = 1;
+        STORE = 2;
+    }
+    repeated ArtDesignTag tag = 3; //maybe strings/etc, but likely code will want to use this more than artists/designers want to iterate
+    bytes data = 4;
+    ColorProtobufv1 color = 5;
+    ColorProtobufv2 colorNew = 6;
+}
+
+

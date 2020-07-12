@@ -1,0 +1,3 @@
+#this content is hashed, so make sure we have consistent line endings
+#when creating new files on macos, you will need to create them with crlf line endings
+* text=crlf

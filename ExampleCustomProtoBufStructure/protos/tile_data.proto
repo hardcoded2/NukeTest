@@ -1,0 +1,14 @@
+
+syntax = "proto3";
+message TileData {
+    enum TileCollisionType{
+        LAND = 0;
+        WATER = 1;
+    }
+    int32 TileID = 1; //for referential integrity
+    string TileHumanReadableName = 2;
+    TileCollisionType CollisionType = 3;
+    bytes tileImageData = 4; //Warning: max size 2^32
+    int32 TileXSize = 5;
+    int32 TileYSize = 6;
+}
