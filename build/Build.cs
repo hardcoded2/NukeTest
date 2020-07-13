@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Nuke.Common;
 using Nuke.Common.Execution;
 using Nuke.Common.Git;
@@ -38,7 +41,7 @@ class Build : NukeBuild
     AbsolutePath SourceDirectory => RootDirectory / "Inventory";
     AbsolutePath TestsDirectory => RootDirectory / "Inventory.Tests";
     AbsolutePath OutputDirectory => RootDirectory / "output";
-
+    
     Target Clean => _ => _
         .Before(Restore)
         .Executes(() =>
@@ -54,10 +57,92 @@ class Build : NukeBuild
             DotNetRestore(s => s
                 .SetProjectFile(Solution));
         });
+
+    Target CleanGeneratedProtocs => _ => _
+        .Executes(() =>
+        {
+            AbsolutePath ProtogenOutputDir = RootDirectory / "ExampleCustomProtoBufStructure/gen";
+
+            var protogenGeneratedCsFiles = new DirectoryInfo(ProtogenOutputDir).EnumerateFiles("*.cs");
+            protogenGeneratedCsFiles.ForEach(fileInfo => fileInfo.Delete());
+            
+        });
+    Target DevTestTools => _ => _
+        .Executes(() =>
+        {
+            ManualToolresolvingMeandering();
+        });
+    void ManualToolresolvingMeandering()
+    {
+        string TryGetPathExe(string exe)
+        {
+            try
+            {
+                return ToolPathResolver.GetPathExecutable(exe);
+            }
+            catch
+            {
+            }
+
+            return string.Empty;
+        }
+        string TryGetPathToolExe(string exe)
+        {
+            try
+            {
+                return ToolPathResolver.TryGetEnvironmentExecutable(exe);
+            }
+            catch
+            {
+            }
+
+            return string.Empty;
+        }
+        //ToolResolver.GetPathTool(exe)
+            
+        //ToolResolver.GetPathTool("appveyor");
+        //Tool myTool = ToolResolver.GetPathTool(exe)
+        void TryAndGetPathEXEAndPrint(string exe)
+        {
+            Logger.Normal($"Trying to get exe {exe}: '{TryGetPathExe(exe)}'");
+        }
+        var executables = new[]{"DOES NOT EXIST","powershell","bash"};
+        //ToolPathResolver.GetPathExecutable - get something on the path 
+        //vs TryGetEnvironmentExecutable             //ToolPathResolver.TryGetEnvironmentExecutable -- this will get an exe defined by an enviornment variable
+        //vs ToolResolver.GetPathTool(exe) - get a tool in the user's path based on 
+        executables.ForEach(TryAndGetPathEXEAndPrint);    
+        Logger.Normal($"Comspec is set up by something on windows systems as a standard exe tool, so here is the path {TryGetPathToolExe("ComSpec")}");
+        Tool git = ToolResolver.GetPathTool("git");
+        try
+        {
+           Tool doesNotExist = ToolResolver.GetPathTool("DOES NOT EXIST");
+        }catch(Exception e){}
+        try
+        {
+            ControlFlow.Fail("TEST same as trying to get non existent tool with tool resolver");
+        }catch(Exception e){}
+    }
+
+    bool RunningOnWindows()
+    {
+        return RunningOnPlatform(OSPlatform.Windows);
+    }
+
+    bool RunningOnMac()
+    {
+        return RunningOnPlatform(OSPlatform.OSX);
+    }
+    bool RunningOnPlatform(OSPlatform platform)
+    {
+        return RuntimeInformation.IsOSPlatform(platform);
+    }
     Target BuildProtosToDLL => _ => _
         .Executes(() =>
         {
-            Logger.Normal("HELLO WORLD");   
+            var genProtosFromThisDir = RootDirectory / "ExampleCustomProtoBufStructure";
+            Logger.Normal(genProtosFromThisDir);
+            Protoc.Invoke(
+                "--proto_path=protos --csharp_out=gen protos/*.proto",genProtosFromThisDir);
         });
     Target Compile => _ => _
         .DependsOn(Restore)
