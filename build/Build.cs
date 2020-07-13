@@ -34,7 +34,7 @@ class Build : NukeBuild
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
-    [Solution] readonly Solution Solution;
+    [Solution("Backend.sln")] readonly Solution BackendSolution;
 
     
 
@@ -79,7 +79,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             DotNetRestore(s => s
-                .SetProjectFile(Solution));
+                .SetProjectFile(BackendSolution));
             DotNetRestore(s => s
                 .SetProjectFile(ProtobufCSDLLSolution)); //not sure if this should be in this target. or if "restore" should exist in the way it does here
         });
@@ -118,10 +118,11 @@ class Build : NukeBuild
         });
     Target Compile => _ => _
         .DependsOn(Restore)
+        .DependsOn(BuildProtosToDLL)
         .Executes(() =>
         {
             DotNetBuild(s => s
-                .SetProjectFile(Solution)
+                .SetProjectFile(BackendSolution)
                 .SetConfiguration(Configuration)
                 .SetAssemblyVersion(GitVersion.AssemblySemVer)
                 .SetFileVersion(GitVersion.AssemblySemFileVer)
