@@ -129,6 +129,5 @@ class Build : NukeBuild
                 .SetInformationalVersion(GitVersion.InformationalVersion)
                 .EnableNoRestore());
         });
-    Target DevTestTools => _ => _
-        .Executes(DevTestToolResolving.ManualToolresolvingMeandering);
+    
 }
