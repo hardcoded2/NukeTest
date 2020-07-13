@@ -48,6 +48,8 @@ namespace DevTests
                 executables.ForEach(TryAndGetPathEXEAndPrint);    
                 Logger.Normal($"Comspec is set up by something on windows systems as a standard exe tool, so here is the path {TryGetPathToolExe("ComSpec")}");
                 Tool git = ToolResolver.GetPathTool("git");
+#pragma warning disable 168 
+                //just showing that ControlFlow.Fail throws an "Exception" object that is not sub-typed
                 try
                 {
                    Tool doesNotExist = ToolResolver.GetPathTool("DOES NOT EXIST");
@@ -56,6 +58,9 @@ namespace DevTests
                 {
                     ControlFlow.Fail("TEST same as trying to get non existent tool with tool resolver");
                 }catch(Exception e){}
+#pragma warning restore 168
+
             }
+        
     }
 }
