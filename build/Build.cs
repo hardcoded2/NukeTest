@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using DevTests;
 using Nuke.Common;
 using Nuke.Common.Execution;
@@ -98,7 +99,7 @@ class Build : NukeBuild
         .Executes(() =>
         {
             var genProtosFromThisDir = RootDirectory / "ExampleCustomProtoBufStructure";
-            Logger.Normal(genProtosFromThisDir);
+            Logger.Normal($"where we are generating protobufs from {genProtosFromThisDir}");
             Protoc.Invoke(
                 "--proto_path=protos --csharp_out=gen protos/*.proto",genProtosFromThisDir);
             DotNetRestore(s => s
@@ -110,7 +111,10 @@ class Build : NukeBuild
                 .SetFileVersion(GitVersion.AssemblySemFileVer)
                 .SetInformationalVersion(GitVersion.InformationalVersion)
                 .EnableNoRestore());
-            
+            //output files -- there has to be a better way???
+            var generatedFiles = (genProtosFromThisDir / "bin").GlobFiles("**"); //.GlobDirectories("**/bin", "**/obj");
+            Logger.Normal($"Files: {string.Join(",",generatedFiles) }");
+            //example debug configuration: Files: E:\dev\NukeTest\ExampleCustomProtoBufStructure\bin\Debug\netcoreapp3.1\ExampleCustomProtoBufStructure.deps.json,E:\dev\NukeTest\ExampleCustomProtoBufStructure\bin\Debug\netcoreapp3.1\ExampleCustomProtoBufStructure.dll,E:\dev\NukeTest\ExampleCustomProtoBufStructure\bin\Debug\netcoreapp3.1\ExampleCustomProtoBufStructure.pdb
         });
     Target Compile => _ => _
         .DependsOn(Restore)
