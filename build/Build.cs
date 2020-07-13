@@ -45,6 +45,7 @@ class Build : NukeBuild
     
     Target Clean => _ => _
         .Before(Restore)
+        .DependsOn(CleanGeneratedProtocs)
         .Executes(() =>
         {
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
@@ -66,10 +67,10 @@ class Build : NukeBuild
 
             var protogenGeneratedCsFiles = new DirectoryInfo(ProtogenOutputDir).EnumerateFiles("*.cs");
             protogenGeneratedCsFiles.ForEach(fileInfo => fileInfo.Delete());
-            
         });
 
     Target BuildProtosToDLL => _ => _
+        .DependsOn(CleanGeneratedProtocs)
         .Executes(() =>
         {
             var genProtosFromThisDir = RootDirectory / "ExampleCustomProtoBufStructure";
